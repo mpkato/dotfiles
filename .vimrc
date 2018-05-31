@@ -7,311 +7,320 @@
 "                                                                           "
 "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
-"" General {{{1
+" release autogroup in MyAutoCmd
+augroup MyAutoCmd
+  autocmd!
+augroup END
 
-set nocompatible            " use Vim in more useful way
-set clipboard=unnamed       " share clipboard with other systems
+set ignorecase          " 大文字小文字を区別しない
+set smartcase           " 検索文字に大文字がある場合は大文字小文字を区別
+set incsearch           " インクリメンタルサーチ
+set hlsearch            " 検索マッチテキストをハイライト (2013-07-03 14:30 修正）
 
-"set rtp+=~/.vim/vundle.git/
-"call vundle#rc()
-set rtp+=~/.vim/neobundle.vim
-call neobundle#begin(expand('~/.vim/neobundle'))
-nmap <Insert> :a!<CR>
+" バックスラッシュやクエスチョンを状況に合わせ自動的にエスケープ
+cnoremap <expr> / getcmdtype() == '/' ? '\/' : '/'
+cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
 
-""" Bundle
-"Bundle "Bundle/desert.vim"
-autocmd ColorScheme * hi Folded gui=bold term=standout ctermbg=Black ctermfg=DarkBlue guibg=Grey30 guifg=Grey80
-autocmd ColorScheme * hi FoldColumn gui=bold term=standout ctermbg=Black ctermfg=DarkBlue guibg=Grey guifg=DarkBlue
-colorscheme desert
-"colorscheme default
+set shiftround          " '<'や'>'でインデントする際に'shiftwidth'の倍数に丸める
+set infercase           " 補完時に大文字小文字を区別しない
+"set virtualedit=all     " カーソルを文字が存在しない部分でも動けるようにする
+set hidden              " バッファを閉じる代わりに隠す（Undo履歴を残すため）
+set switchbuf=useopen   " 新しく開く代わりにすでに開いてあるバッファを開く
+set showmatch           " 対応する括弧などをハイライト表示する
+set matchtime=3         " 対応括弧のハイライト表示を3秒にする
 
-NeoBundle 'buftabs'
-set laststatus=2
-let g:buftabs_only_basename=1
-let g:buftabs_in_statusline=1
-let g:buftabs_active_highlight_group="Visual"
-autocmd WinEnter * let w:original_statusline = matchstr(&statusline, "%=.*") | call Buftabs_enable()
+" 対応括弧に'<'と'>'のペアを追加
+set matchpairs& matchpairs+=<:>
 
+" バックスペースでなんでも消せるようにする
+set backspace=indent,eol,start
+
+" クリップボードをデフォルトのレジスタとして指定。後にYankRingを使うので
+" 'unnamedplus'が存在しているかどうかで設定を分ける必要がある
+if has('unnamedplus')
+    set clipboard& clipboard+=unnamedplus,unnamed 
+else
+    set clipboard& clipboard+=unnamed
+endif
+
+" Swapファイル？Backupファイル？前時代的すぎ
+" なので全て無効化する
+set nowritebackup
+set nobackup
+set noswapfile
+
+set list                " 不可視文字の可視化
+set number              " 行番号の表示
+set wrap                " 長いテキストの折り返し
+set textwidth=0         " 自動的に改行が入るのを無効化
+set colorcolumn=80      " その代わり80文字目にラインを入れる
+
+" 前時代的スクリーンベルを無効化
+set t_vb=
+set novisualbell
+
+" デフォルト不可視文字は美しくないのでUnicodeで綺麗に
+set listchars=tab:»-,trail:-,extends:»,precedes:«,nbsp:%,eol:↲
+
+" 入力モード中に素早くjjと入力した場合はESCとみなす
+inoremap jj <Esc>
+
+" ESCを二回押すことでハイライトを消す
+nmap <silent> <Esc><Esc> :nohlsearch<CR>
+
+" カーソル下の単語を * で検索
+vnoremap <silent> * "vy/\V<C-r>=substitute(escape(@v, '\/'), "\n", '\\n', 'g')<CR><CR>
+
+" 検索後にジャンプした際に検索単語を画面中央に持ってくる
+nnoremap n nzz
+nnoremap N Nzz
+nnoremap * *zz
+nnoremap # #zz
+nnoremap g* g*zz
+nnoremap g# g#zz
+
+" j, k による移動を折り返されたテキストでも自然に振る舞うように変更
+nnoremap j gj
+nnoremap k gk
+
+" vを二回で行末まで選択
+vnoremap v $h
+
+" TABにて対応ペアにジャンプ
+nnoremap <Tab> %
+vnoremap <Tab> %
+
+" Ctrl + hjkl でウィンドウ間を移動
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Shift + 矢印でウィンドウサイズを変更
+nnoremap <S-Left>  <C-w><<CR>
+nnoremap <S-Right> <C-w>><CR>
+nnoremap <S-Up>    <C-w>-<CR>
+nnoremap <S-Down>  <C-w>+<CR>
+
+" T + ? で各種設定をトグル
+nnoremap [toggle] <Nop>
+nmap T [toggle]
+nnoremap <silent> [toggle]s :setl spell!<CR>:setl spell?<CR>
+nnoremap <silent> [toggle]l :setl list!<CR>:setl list?<CR>
+nnoremap <silent> [toggle]t :setl expandtab!<CR>:setl expandtab?<CR>
+nnoremap <silent> [toggle]w :setl wrap!<CR>:setl wrap?<CR>
+
+" make, grep などのコマンド後に自動的にQuickFixを開く
+autocmd MyAutoCmd QuickfixCmdPost make,grep,grepadd,vimgrep copen
+
+" QuickFixおよびHelpでは q でバッファを閉じる
+autocmd MyAutoCmd FileType help,qf nnoremap <buffer> q <C-w>c
+
+" w!! でスーパーユーザーとして保存（sudoが使える環境限定）
+cmap w!! w !sudo tee > /dev/null %
+
+" :e などでファイルを開く際にフォルダが存在しない場合は自動作成
+function! s:mkdir(dir, force)
+  if !isdirectory(a:dir) && (a:force ||
+        \ input(printf('"%s" does not exist. Create? [y/N]', a:dir)) =~? '^y\%[es]$')
+    call mkdir(iconv(a:dir, &encoding, &termencoding), 'p')
+  endif
+endfunction
+autocmd MyAutoCmd BufWritePre * call s:mkdir(expand('<afile>:p:h'), v:cmdbang)
+
+" vim 起動時のみカレントディレクトリを開いたファイルの親ディレクトリに指定
+autocmd MyAutoCmd VimEnter * call s:ChangeCurrentDir('', '')
+function! s:ChangeCurrentDir(directory, bang)
+    if a:directory == ''
+        lcd %:p:h
+    else
+        execute 'lcd' . a:directory
+    endif
+
+    if a:bang == ''
+        pwd
+    endif
+endfunction
+
+" ~/.vimrc.localが存在する場合のみ設定を読み込む
+let s:local_vimrc = expand('~/.vimrc.local')
+if filereadable(s:local_vimrc)
+    execute 'source ' . s:local_vimrc
+endif
+
+
+
+" neobundle
+let s:noplugin = 0
+let s:bundle_root = expand('~/.vim/bundle')
+let s:neobundle_root = s:bundle_root . '/neobundle.vim'
+" NeoBundleを'runtimepath'に追加し初期化を行う
+if has('vim_starting')
+execute "set runtimepath+=" . s:neobundle_root
+endif
+call neobundle#begin(expand(s:bundle_root))
+
+" NeoBundle自身をNeoBundleで管理させる
+NeoBundleFetch 'Shougo/neobundle.vim'
+
+" 非同期通信を可能にする
+" 'build'が指定されているのでインストール時に自動的に
+" 指定されたコマンドが実行され vimproc がコンパイルされる
+NeoBundle "Shougo/vimproc", {
+\ "build": {
+\   "windows"   : "make -f make_mingw32.mak",
+\   "cygwin"    : "make -f make_cygwin.mak",
+\   "mac"       : "make -f make_mac.mak",
+\   "unix"      : "make -f make_unix.mak",
+\ }}
+
+" (ry
+
+" インストールされていないプラグインのチェックおよびダウンロード
+NeoBundleCheck
+
+" ファイルタイププラグインおよびインデントを有効化
+" これはNeoBundleによる処理が終了したあとに呼ばなければならない
+filetype plugin indent on
+
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/neoyank.vim'
+NeoBundle 'Shougo/neomru.vim'
+"let g:unite_enable_start_insert=1
+let g:unite_source_history_yank_enable =1
+let g:unite_source_file_mru_limit = 200
+nnoremap <silent> <C-y> :<C-u>Unite history/yank<CR>
+nnoremap <silent> <C-j> :<C-u>Unite file_mru buffer<CR>
+
+NeoBundleLazy "Shougo/vimfiler", {
+      \ "depends": ["Shougo/unite.vim"],
+      \ "autoload": {
+      \   "commands": ["VimFilerTab", "VimFiler", "VimFilerExplorer"],
+      \   "mappings": ['<Plug>(vimfiler_switch)'],
+      \   "explorer": 1,
+      \ }}
+nnoremap <C-h> :VimFilerExplorer<CR>
+" close vimfiler automatically when there are only vimfiler open
+autocmd MyAutoCmd BufEnter * if (winnr('$') == 1 && &filetype ==# 'vimfiler') | q | endif
+let s:hooks = neobundle#get_hooks("vimfiler")
+function! s:hooks.on_source(bundle)
+  let g:vimfiler_as_default_explorer = 1
+  let g:vimfiler_enable_auto_cd = 1
+  
+  " .から始まるファイルおよび.pycで終わるファイルを不可視パターンに
+  " 2013-08-14 追記
+  let g:vimfiler_ignore_pattern = "\%(^\..*\|\.pyc$\)"
+
+  " vimfiler specific key mappings
+  autocmd MyAutoCmd FileType vimfiler call s:vimfiler_settings()
+  function! s:vimfiler_settings()
+    " ^^ to go up
+    nmap <buffer> ^^ <Plug>(vimfiler_switch_to_parent_directory)
+    " use R to refresh
+    nmap <buffer> R <Plug>(vimfiler_redraw_screen)
+    " overwrite C-l
+    nmap <buffer> <C-l> <C-w>l
+  endfunction
+endfunction
+
+NeoBundleLazy "mattn/gist-vim", {
+      \ "depends": ["mattn/webapi-vim"],
+      \ "autoload": {
+      \   "commands": ["Gist"],
+      \ }}
+
+" vim-fugitiveは'autocmd'多用してるっぽくて遅延ロード不可
+NeoBundle "tpope/vim-fugitive"
+NeoBundleLazy "gregsexton/gitv", {
+      \ "depends": ["tpope/vim-fugitive"],
+      \ "autoload": {
+      \   "commands": ["Gitv"],
+      \ }}
+
+NeoBundle 'vim-scripts/Align'
+
+NeoBundleLazy "Shougo/neocomplete.vim", {
+      \ "autoload": {
+      \    "insert": 1,
+      \ }}
+let g:neocomplete#enable_at_startup = 1
+let s:hooks = neobundle#get_hooks("neocomplete.vim")
+function! s:hooks.on_source(bundle)
+let g:acp_enableAtStartup = 0
+let g:neocomplet#enable_smart_case = 1
+" NeoCompleteを有効化
+" NeoCompleteEnable
+endfunction
+
+NeoBundle "scrooloose/syntastic", {
+      \ "build": {
+      \   "mac": ["pip install flake8", "npm -g install coffeelint"],
+      \   "unix": ["pip install flake8", "npm -g install coffeelint"],
+      \ }}
+
+NeoBundle 'simnalamburt/vim-mundo'
+nnoremap <C-g> :MundoToggle<CR>
+set undofile
+set undodir=~/.vim/undo
+
+NeoBundleLazy "thinca/vim-quickrun", {
+      \ "autoload": {
+      \   "mappings": [['nxo', '<Plug>(quickrun)']]
+      \ }}
+let s:hooks = neobundle#get_hooks("vim-quickrun")
+function! s:hooks.on_source(bundle)
+  let g:quickrun_config = {
+      \ "*": {"runner": "remote/vimproc"},
+      \ }
+endfunction
+
+NeoBundleLazy "davidhalter/jedi-vim", {
+      \ "autoload": {
+      \   "filetypes": ["python", "python3", "djangohtml"],
+      \ },
+      \ "build": {
+      \   "mac": "pip install jedi",
+      \   "unix": "pip install jedi",
+      \ }}
+let s:hooks = neobundle#get_hooks("jedi-vim")
+function! s:hooks.on_source(bundle)
+  " jediにvimの設定を任せると'completeopt+=preview'するので
+  " 自動設定機能をOFFにし手動で設定を行う
+  let g:jedi#auto_vim_configuration = 0
+  " 補完の最初の項目が選択された状態だと使いにくいためオフにする
+  let g:jedi#popup_select_first = 0
+  " quickrunと被るため大文字に変更
+  let g:jedi#rename_command = '<Leader>R'
+  " gundoと被るため大文字に変更 (2013-06-24 10:00 追記）
+  let g:jedi#goto_command = '<Leader>G'
+endfunction
+
+"lightline
+set t_Co=256
+NeoBundle 'vim-airline/vim-airline'
+NeoBundle 'vim-airline/vim-airline-themes'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline_theme = 'base16'
+
+" Color schema
+NeoBundle 'ujihisa/unite-colorscheme'
+NeoBundle 'cocopon/iceberg.vim'
+NeoBundle 'tomasr/molokai'
+syntax on
+autocmd ColorScheme * highlight Comment ctermfg=111
+autocmd ColorScheme * highlight LineNr ctermfg=244
+
+" Old customs
+nmap <C-e> :QuickRun<CR>
+nmap <C-f> :only!<CR>
+nmap <C-n> :bn<CR>
+nmap <C-b> :bp<CR>
 map <ESC>[A <C-Up>
 map <ESC>[B <C-Down>
 map <ESC>[C <C-Right>
 map <ESC>[D <C-Left>
-"nmap <C-Up> :NERDTreeToggle<CR>
-nmap <C-v> :Bclose<CR>
-nmap <C-n> :bn<CR>
-nmap <C-b> :bp<CR>
-imap <C-Space> <C-x><C-o>
-
-NeoBundle 'SuperTab'
-NeoBundle 'AutoComplPop'
-NeoBundle 'rbgrouleff/bclose.vim'
-
-NeoBundle 'tpope/vim-rails'
-NeoBundle 'vim-ruby/vim-ruby'
-autocmd FileType ruby set expandtab tabstop=2 shiftwidth=2 softtabstop=2
-" fold
-autocmd FileType ruby set foldmethod=indent foldlevel=2 foldcolumn=3
-
-"Bundle 'davidhalter/jedi-vim'
-NeoBundle 'jmcantrell/vim-virtualenv'
-autocmd FileType python let b:did_ftplugin = 1
-
-"pythoncomplete
-NeoBundle 'pythoncomplete'
-autocmd FileType python set omnifunc=pythoncomplete#Complete
-"hi Pmenu ctermbg=0
-"hi PmenuSel ctermbg=1
-"hi PmenuSbar ctermbg=2
-"hi PmenuThumb ctermfg=3
-"hi SpellBad term=reverse ctermbg=6
-"Bundle 'davidhalter/jedi-vim'
-"let g:jedi#auto_initialization = 1
-"let g:jedi#rename_command = "<leader>R"
-"let g:jedi#popup_on_dot = 1
-"autocmd FileType python let b:did_ftplugin = 1
-
-autocmd FileType python setl autoindent
-autocmd FileType python setl smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
-autocmd FileType python setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
-
-filetype plugin on
-setlocal omnifunc=syntaxcomplete#Complete
-
-"NeoBundle 'kevinw/pyflakes-vim'
-let g:syntastic_mode_map = {
-            \ 'mode': 'active',
-            \ 'active_filetypes': ['php', 'sh', 'vim'],
-            \ 'passive_filetypes': ['html', 'python']
-            \}
-NeoBundle 'ivanov/vim-ipython'
-
-NeoBundle 'thinca/vim-quickrun'
-set splitright
-nmap <C-e> :QuickRun<CR>
-nmap <C-f> :only!<CR>
-let g:quickrun_config = {}
-let g:quickrun_config['ruby'] = {'command': 'rspec', 'cmdopt': "%{line('.')}", 'exec': ["bundle exec %c %s:%o"], 'outputter': 'buffered:target=buffer'}
-let g:quickrun_config['cucumber'] = {'command': 'rspec', 'exec': ["bundle exec %c"]}
-
-"AnsiEsc
-"Bundle 'vim-scripts/AnsiEsc.vim'
-"Bundle 'powerman/vim-plugin-AnsiEsc'
-
-"Bundle "skwp/vim-rspec.git"
-"let g:rspec_command = "!bundle exec rspec -f d -c --tty {spec}"
-
-NeoBundle 'airblade/vim-gitgutter'
-nnoremap <silent> ,gg :<C-u>GitGutterToggle<CR>
-nnoremap <silent> ,gh :<C-u>GitGutterLineHighlightsToggle<CR>
-
-"haml
-NeoBundle 'tpope/vim-haml'
-autocmd FileType haml set expandtab tabstop=2 shiftwidth=2 softtabstop=2
-
-"markdown
-NeoBundle 'Markdown'
-NeoBundle 'suan/vim-instant-markdown'
-NeoBundle 'tpope/vim-markdown'
-"Bundle 'tyru/open-browser.vim'
-"Bundle 'thinca/vim-quickrun'
-"let g:quickrun_config = {}
-"let g:quickrun_config['markdown'] = {
-"      \   'outputter': 'browser'
-"      \ }
-
-"Bundle 'nathanaelkane/vim-indent-guides'
-"autocmd FileType python IndentGuidesEnable
-"let g:indent_guides_start_level = 1
-"let g:indent_guides_auto_colors = 0
-"hi IndentGuidesOdd  ctermbg=1
-"hi IndentGuidesEven ctermbg=4
-"let g:indent_guides_guide_size = 1
-
-"neocomplecache repo
-"Bundle "Shougo/neocomplete.vim.git"
-"inoremap <expr><Nul> "\<C-x>\<C-o>"
-
-"jinja
-NeoBundle "jinja"
-autocmd BufNewFile,BufRead *.twig set filetype=htmljinja
-
-
-"coffeescript
-NeoBundle "kchmck/vim-coffee-script"
-autocmd BufRead,BufNewFile,BufReadPre *.coffee set filetype=coffee
-
-autocmd BufRead,BufNewFile Gemfile set filetype=ruby
-autocmd BufRead,BufNewFile *.ruby set filetype=ruby
-autocmd BufRead,BufNewFile *.json set filetype=javascript
-
-autocmd FileType javascript set expandtab tabstop=2 shiftwidth=2 softtabstop=2
-NeoBundle 'pangloss/vim-javascript'
-NeoBundle 'mxw/vim-jsx'
-let g:jsx_ext_required = 0
-let g:jsx_pragma_required = 1
-au BufRead,BufNewFile *.js set filetype=javascript.jsx
-
-NeoBundle 'neomake/neomake'
-autocmd! BufWritePost *.js Neomake
-let g:neomake_javascript_enabled_makers = ['eslint']
-
-"NeoBundle 'scrooloose/syntastic'
-"let g:syntastic_check_on_open=0
-"let g:syntastic_check_on_save=1
-"let g:syntastic_check_on_wq = 0
-"let g:syntastic_loc_list_height=6
-"set statusline+=%#warningmsg#
-"set statusline+=%{SyntasticStatuslineFlag()}
-"set statusline+=%*
-"let g:syntastic_javascript_checkers = ['eslint']
-"let g:syntastic_mode_map = {
-"      \ 'mode': 'active',
-"      \ 'active_filetypes': ['javascript'],
-"      \ 'passive_filetypes': []
-"      \ }
-
-"yaml
-autocmd FileType yaml set expandtab tabstop=2 shiftwidth=2 softtabstop=2
+let mapleader = "<Space>"
 
 call neobundle#end()
 
-"ESC
-imap <c-j> <esc>
-
-"auto mkdir
-augroup vimrc-auto-mkdir  " {{{
-  autocmd!
-  autocmd BufWritePre * call s:auto_mkdir(expand('<afile>:p:h'), v:cmdbang)
-  function! s:auto_mkdir(dir, force)  " {{{
-    if !isdirectory(a:dir) && (a:force ||
-    \    input(printf('"%s" does not exist. Create? [y/N]', a:dir)) =~? '^y\%[es]$')
-      call mkdir(iconv(a:dir, &encoding, &termencoding), 'p')
-    endif
-  endfunction  " }}}
-augroup END  " }}}
-
-"" Text Formatting {{{1
-
-set autoindent              " automatic indent new lines
-set smartindent             " be smart about it
-inoremap # X<BS>#
-set wrap                    " wrap lines
-set sidescroll=5
-set softtabstop=4
-set shiftwidth=4
-set shiftround
-set tabstop=4
-set expandtab               " expand tabs to spaces
-set nosmarttab              " fuck tabs
-set formatoptions+=n        " support for numbered/bullet lists
-set textwidth=79            " wrap at 79 chars by default
-if v:version >= 703
-  setlocal colorcolumn=80
-endif
-set wrapmargin=0
-set virtualedit=block       " allow virtual edit in visual block ..
-
-"" Remapping {{{1
-
-let mapleader=','           " Lead with ,
-" Jump to vimrc
-nnoremap <space><space> :<C-u>edit $HOME/.vimrc<CR>
-" Reload vimrc setting
-nnoremap <space>s       :<C-u>source $HOME/.vimrc<CR>
-" Create new tab
-cnoremap <C-t> <C-u>tabnew<CR>
-nnoremap <C-h> :<C-u>tabprevious<CR>
-nnoremap <C-l> :<C-u>tabnext<CR>
-
-"" UI {{{1
-
-set ruler                   " show the cursor position all the time
-" highlight cursor line in current window{{{2
-augroup cch
-  autocmd! cch
-  autocmd WinLeave * set nocursorline
-  autocmd WinEnter,BufRead * set cursorline
-augroup END
-highlight clear CursorLine
-highlight CursorLine ctermbg=black
-" }}}2
-set showcmd                 " display incomplete commands
-set number                  " line numbers
-set nolazyredraw            " don't redraw while executing macros
-set wildmenu                " turn on wild menu
-set wildmode=list:longest,full
-set cmdheight=1             " command line height
-" Enable all keys to move the cursor left/right to the previous/next line
-set whichwrap=b,s,h,l,<,>,[,]
-" Allow backspacing over everything in insert mode
-set backspace=indent,eol,start
-set shortmess=filtIoOA      " shorten messages
-set report=0                " tell us about changes
-set nostartofline           " don't jum to the start of line when scrolling
-set showmatch               " brackets/braces that is
-set matchtime=3             " duration to show matching brace (1/10 sec)
-set laststatus=2            " The last window always have status line
-set scrolloff=5             " Keep at least 5 lines above and below the cursor
-set visualbell t_vb=        " No beep sound
-" Treat octal and hexadecimal number as decimal number
-" octal  Numbers that start with a zero will be considered to be octal
-"        Example: Using CTRL-A on "007" results in "010"
-" hex    Numbers starting with "0x" or "0X" will be considered to be hexadecimal
-"        Example: Using CTRL-X on "0x100" results in "0x0ff"
-set nrformats-=octal,hex
-if has("mouse") " Enable the use of the mouse in all modes
-  set mouse=a
-endif
-
-syntax on
-"" Colorize {{{2
-
-
-" highlight whitespaces
-highlight WhitespaceEOL ctermbg=red
-matc WhitespaceEOL /\s\+$/
-
-" highlight comments
-"highlight Comment ctermfg=DarkCyan
-
-"" Backup {{{1
-
-" backup current file, deleted afterwards
-set nobackup
-set writebackup
-if !filewritable($HOME."/.vim-backup")
-    call mkdir($HOME."/.vim-backup", "p")
-endif
-set backupdir=$HOME/.vim-backup
-if !filewritable($HOME."/.vim-swap")
-    call mkdir($HOME."/.vim-swap", "p")
-endif
-set directory=$HOME/.vim-swap
-
-"" Search {{{1
-
-set history=100             " keep 100 lines of command line histories
-set ignorecase
-set smartcase
-set wrapscan                " Searches wrap around the end of the file
-" While typing a search command, show where the pattern matches
-set incsearch
-set hlsearch                " highlighting matches
-" turn off highlight by Esc x 2
-nmap <ESC><ESC> :nohlsearch<CR><ESC>
-
-"" Character encoding {{{1
-
-set encoding=utf-8          " Use utf-8
-set termencoding=utf-8      " ..
-set fileencodings=utf-8     " ..
-" Automatic end-of-file format detection
-set fileformats=unix,mac,dos
-
-"" Source {{{1
-
-
-if filereadable(expand('~/.vimrc.local'))
-  source ~/.vimrc.local
-endif
-
+colorscheme iceberg
