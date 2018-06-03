@@ -291,7 +291,7 @@ syntax on
 autocmd ColorScheme * highlight Comment ctermfg=111
 autocmd ColorScheme * highlight LineNr ctermfg=244
 autocmd ColorScheme * highlight NonText ctermfg=244
-autocmd ColorScheme * highlight Visual ctermfg=8
+autocmd ColorScheme * highlight Visual ctermfg=8 ctermbg=4
 
 NeoBundle 'miyakogi/seiya.vim'
 let g:seiya_auto_enable=1
