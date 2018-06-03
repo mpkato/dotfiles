@@ -294,6 +294,9 @@ autocmd ColorScheme * highlight LineNr ctermfg=244
 autocmd ColorScheme * highlight NonText ctermfg=244
 autocmd ColorScheme * highlight Visual ctermfg=8
 
+NeoBundle 'miyakogi/seiya.vim'
+let g:seiya_auto_enable=1
+
 " Old customs
 nmap <C-e> :QuickRun<CR>
 nmap <C-f> :only!<CR>
