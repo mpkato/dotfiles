@@ -287,7 +287,6 @@ let g:airline_theme = 'base16'
 " Color schema
 NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'cocopon/iceberg.vim'
-NeoBundle 'tomasr/molokai'
 syntax on
 autocmd ColorScheme * highlight Comment ctermfg=111
 autocmd ColorScheme * highlight LineNr ctermfg=244
