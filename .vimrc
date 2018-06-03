@@ -274,6 +274,9 @@ function! s:hooks.on_source(bundle)
       \ }
 endfunction
 
+NeoBundle 'airblade/vim-gitgutter'
+let g:gitgutter_highlight_lines = 1
+
 "lightline
 set t_Co=256
 NeoBundle 'vim-airline/vim-airline'
