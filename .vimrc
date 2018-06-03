@@ -289,6 +289,7 @@ syntax on
 autocmd ColorScheme * highlight Comment ctermfg=111
 autocmd ColorScheme * highlight LineNr ctermfg=244
 autocmd ColorScheme * highlight NonText ctermfg=244
+autocmd ColorScheme * highlight Visual ctermfg=8
 
 " Old customs
 nmap <C-e> :QuickRun<CR>
