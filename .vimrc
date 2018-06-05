@@ -252,11 +252,12 @@ let g:neocomplet#enable_smart_case = 1
 " NeoCompleteEnable
 endfunction
 
-NeoBundle "scrooloose/syntastic", {
-      \ "build": {
-      \   "mac": ["pip install flake8", "npm -g install coffeelint"],
-      \   "unix": ["pip install flake8", "npm -g install coffeelint"],
-      \ }}
+"NeoBundle "scrooloose/syntastic", {
+"      \ "build": {
+"      \   "mac": ["pip install flake8", "npm -g install coffeelint"],
+"      \   "unix": ["pip install flake8", "npm -g install coffeelint"],
+"      \ }}
+NeoBundle "w0rp/ale"
 
 NeoBundle 'simnalamburt/vim-mundo'
 nnoremap <C-g> :MundoToggle<CR>
@@ -268,11 +269,11 @@ NeoBundleLazy "thinca/vim-quickrun", {
       \   "mappings": [['nxo', '<Plug>(quickrun)']]
       \ }}
 let s:hooks = neobundle#get_hooks("vim-quickrun")
-function! s:hooks.on_source(bundle)
-  let g:quickrun_config = {
-      \ "*": {"runner": "remote/vimproc"},
-      \ }
-endfunction
+"function! s:hooks.on_source(bundle)
+  "let g:quickrun_config = {
+  "    \ "*": {"runner": "remote/vimproc"},
+  "    \ }
+"endfunction
 
 NeoBundle 'airblade/vim-gitgutter'
 let g:gitgutter_highlight_lines = 1
@@ -305,6 +306,14 @@ map <ESC>[A <C-Up>
 map <ESC>[B <C-Down>
 map <ESC>[C <C-Right>
 map <ESC>[D <C-Left>
+noremap <Up> <Nop>
+noremap <Down> <Nop>
+noremap <Left> <Nop>
+noremap <Right> <Nop>
+inoremap <Up> <Nop>
+inoremap <Down> <Nop>
+inoremap <Left> <Nop>
+inoremap <Right> <Nop>
 let mapleader = "<Space>"
 
 " Python
