@@ -276,7 +276,6 @@ let s:hooks = neobundle#get_hooks("vim-quickrun")
 "endfunction
 
 NeoBundle 'airblade/vim-gitgutter'
-let g:gitgutter_highlight_lines = 1
 
 "lightline
 set t_Co=256
