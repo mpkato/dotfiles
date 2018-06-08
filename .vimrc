@@ -252,12 +252,8 @@ let g:neocomplet#enable_smart_case = 1
 " NeoCompleteEnable
 endfunction
 
-"NeoBundle "scrooloose/syntastic", {
-"      \ "build": {
-"      \   "mac": ["pip install flake8", "npm -g install coffeelint"],
-"      \   "unix": ["pip install flake8", "npm -g install coffeelint"],
-"      \ }}
 NeoBundle "w0rp/ale"
+let g:ale_linters = {'python': ['flake8']}
 
 NeoBundle 'simnalamburt/vim-mundo'
 nnoremap <C-g> :MundoToggle<CR>
